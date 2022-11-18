@@ -59,7 +59,7 @@ class Bus(StaticClass):
         if event := cls.get_event(name):
             return event
 
-        raise RuntimeError("Event doesn't exist.")
+        raise RuntimeError(f"Event '{name}' doesn't exist.")
 
 
 @final
