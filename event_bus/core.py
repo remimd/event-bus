@@ -19,6 +19,7 @@ class Event:
         self._subscribers.append(subscriber)
 
     def subscribe(self, function: Callable) -> Callable:
+        # It's a decorator
         self.add_subscriber(function)
         return function
 
