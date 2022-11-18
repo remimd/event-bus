@@ -1,0 +1,19 @@
+name: Environment
+description: Set up the environment
+runs:
+  using: "composite"
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.11"
+        architecture: "x64"
+
+    - name: Install Poetry & Dependancies
+      shell: bash
+      run: |
+        pip install --upgrade pip
+        pip install poetry
+        poetry config virtualenvs.create false --local
+        poetry check
+        poetry install
