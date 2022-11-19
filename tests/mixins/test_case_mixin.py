@@ -1,3 +1,5 @@
+import asyncio
+import time
 from contextlib import contextmanager
 from typing import ContextManager
 from unittest.mock import Mock, patch
@@ -20,6 +22,21 @@ class TestCaseMixin:
     def event_factory() -> Event:
         return Event()
 
+    @staticmethod
+    def event_with_subscribers_factory() -> Event:
+        def some_function():
+            time.sleep(1)
+
+        async def some_async_function():
+            await asyncio.sleep(1)
+
+        event = Event()
+
+        event.add_subscriber(some_function)
+        event.add_subscriber(some_async_function)
+
+        return event
+
     """
     mocks
     """
@@ -27,5 +44,5 @@ class TestCaseMixin:
     @staticmethod
     @contextmanager
     def mock_on_trigger(bus: Bus) -> ContextManager[Mock]:
-        with patch.object(bus._handler, "on_trigger") as mock:
+        with patch.object(bus._handler, "on_trigger", return_value=None) as mock:
             yield mock

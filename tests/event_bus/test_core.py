@@ -1,6 +1,6 @@
 import pytest
 
-from tests.mixins.test_mixin import TestCaseMixin
+from tests.mixins.test_case_mixin import TestCaseMixin
 
 
 class TestEvent(TestCaseMixin):
@@ -69,16 +69,16 @@ class TestOnEvent(TestCaseMixin):
 
     def test_getattr_with_success_return_function(self):
         bus = self.bus_factory()
-        event_name = "some_event"
+        event_name = "non_existent_event"
         assert event_name not in bus._events.keys()
 
-        @bus.on_event.some_event
+        @bus.on_event.non_existent_event
         def function():
             pass
 
+        assert event_name in bus._events.keys()
         event = bus._events[event_name]
         assert len(event.subscribers) == 1
-        assert event_name in bus._events.keys()
 
 
 class TestBus(TestCaseMixin):
