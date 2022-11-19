@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from inspect import isfunction
-from typing import Any, Callable, Optional, Type, final
+from typing import Callable, Optional, Type, final
 
 from .handlers import AsyncHandler, BusHandler
 
@@ -29,25 +29,25 @@ class Event:
 class OnEvent:
     bus: Bus
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Callable:
         event = self.bus.get_or_create_event(name)
         return event.subscribe
 
 
 @final
 class Bus:
-    on_event: OnEvent
     _events: dict[str, Event]
     _handler: Type[BusHandler]
+    _on_event: OnEvent
 
     def __init__(self, handler: Type[BusHandler] = AsyncHandler):
         self._events = {}
         self._handler = handler
-        self.on_event = OnEvent(self)
+        self._on_event = OnEvent(self)
 
-    def __setattr__(self, key: str, value: Any):
-        class_name = self.__class__.__name__
-        raise RuntimeError(f"'{class_name}' class cannot be updated.")
+    @property
+    def on_event(self) -> OnEvent:
+        return self._on_event  # pragma: no cover
 
     def trigger(self, event_name: str, *args, **kwargs):
         event = self.check_event(event_name)

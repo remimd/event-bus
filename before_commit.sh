@@ -21,9 +21,6 @@ poetry check
 title "BLACK"
 black ./
 
-title "MYPY"
-mypy ./
-
 title "FLAKE"
 flake8
 

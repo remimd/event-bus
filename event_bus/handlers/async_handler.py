@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class AsyncHandler(BusHandler):
     @classmethod
     def on_trigger(cls, event: Event, *args, **kwargs):
-        awaitables = cls._prepare(event.subscribers)
+        awaitables = cls._prepare(event.subscribers, *args, **kwargs)
         job = asyncio.gather(*awaitables)
         asyncio.ensure_future(job)
 
