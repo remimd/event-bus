@@ -25,15 +25,15 @@ class TestEvent:
 
     def test_add_subscriber_with_async_function_return_none(self):
         event = self.event_factory()
-        assert len(event._subscribers) == 0
+        assert len(event.subscribers) == 0
         assert event.add_subscriber(self.some_async_function) is None
-        assert len(event._subscribers) == 1
+        assert len(event.subscribers) == 1
 
     def test_add_subscriber_with_success_return_none(self):
         event = self.event_factory()
-        assert len(event._subscribers) == 0
+        assert len(event.subscribers) == 0
         assert event.add_subscriber(self.some_function) is None
-        assert len(event._subscribers) == 1
+        assert len(event.subscribers) == 1
 
 
 class TestBus:

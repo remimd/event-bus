@@ -1,5 +1,14 @@
 # Usage
 
+## Define a bus
+
+```python
+from event_bus import Bus
+
+
+bus = Bus()
+```
+
 ## Subscribe a function to an event
 
 > ***`event_name`** is the name of the event.*
@@ -9,24 +18,38 @@
 > *Also works with an async function.*
 
 ```python
-from event_bus import on_event
-
-
-@on_event.event_name
+@bus.on_event.event_name
 def some_function():
     # ...
 ```
 
 ## Trigger an event
 
-> ***Prerequisite:** requires an active event loop from `asyncio`.*
+> ***If you don't use a custom handler**, you need an active event loop from `asyncio`.*
 
 ```python
-import event_bus
+bus.trigger("event_name")
+```
+
+## Custom handler
+
+> *You can create a custom handler to modify the behavior of the trigger.*
+
+```python
+from event_bus import BusHandler, Event
 
 
-def some_function():
-    # ...
-    event_bus.trigger("event_name")
-    # ...
+class CustomHandler(BusHandler):
+    @classmethod
+    def on_trigger(cls, event: Event, *args, **kwargs):
+        # ...
+```
+
+> *Define a bus with a custom handler.*
+
+```python
+from event_bus import Bus
+
+
+bus = Bus(CustomHandler)
 ```

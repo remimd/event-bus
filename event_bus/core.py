@@ -1,73 +1,71 @@
-import asyncio
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from inspect import isfunction
-from typing import Awaitable, Callable, Optional, final
+from typing import Any, Callable, Optional, Type, final
 
-from .common import StaticClass
-from .tools.asynchronous import to_awaitable
+from .handlers import AsyncHandler, BusHandler
 
 
 @final
-@dataclass(repr=False, frozen=True, slots=True)
+@dataclass(frozen=True, slots=True)
 class Event:
-    _subscribers: list[Callable] = field(default_factory=list, init=False)
+    subscribers: list[Callable] = field(default_factory=list, init=False)
 
     def add_subscriber(self, subscriber: Callable):
         if not isfunction(subscriber):
             raise TypeError("The subscriber isn't a function.")
 
-        self._subscribers.append(subscriber)
+        self.subscribers.append(subscriber)
 
     def subscribe(self, function: Callable) -> Callable:
         # It's a decorator
         self.add_subscriber(function)
         return function
 
-    def build_awaitables(self, *args, **kwargs) -> tuple[Awaitable, ...]:
-        return tuple(
-            to_awaitable(subscriber, *args, **kwargs)
-            for subscriber in self._subscribers
-        )
-
 
 @final
-class Bus(StaticClass):
-    _events: dict[str, Event] = {}
-
-    @classmethod
-    def trigger(cls, event_name: str, *args, **kwargs):
-        event = cls.check_event(event_name)
-        awaitables = event.build_awaitables(*args, **kwargs)
-        job = asyncio.gather(*awaitables)
-        asyncio.ensure_future(job)
-
-    @classmethod
-    def get_event(cls, name: str) -> Optional[Event]:
-        return cls._events.get(name)
-
-    @classmethod
-    def get_or_create_event(cls, name: str) -> Event:
-        if event := cls.get_event(name):
-            return event
-
-        event = Event()
-        cls._events[name] = event
-        return event
-
-    @classmethod
-    def check_event(cls, name: str) -> Event:
-        if event := cls.get_event(name):
-            return event
-
-        raise RuntimeError(f"Event '{name}' doesn't exist.")
-
-
-@final
+@dataclass(frozen=True, slots=True)
 class OnEvent:
+    bus: Bus
+
     def __getattr__(self, name: str):
-        event = Bus.get_or_create_event(name)
+        event = self.bus.get_or_create_event(name)
         return event.subscribe
 
 
-on_event = OnEvent()
-trigger = Bus.trigger
+@final
+class Bus:
+    on_event: OnEvent
+    _events: dict[str, Event]
+    _handler: Type[BusHandler]
+
+    def __init__(self, handler: Type[BusHandler] = AsyncHandler):
+        self._events = {}
+        self._handler = handler
+        self.on_event = OnEvent(self)
+
+    def __setattr__(self, key: str, value: Any):
+        class_name = self.__class__.__name__
+        raise RuntimeError(f"'{class_name}' class cannot be updated.")
+
+    def trigger(self, event_name: str, *args, **kwargs):
+        event = self.check_event(event_name)
+        self._handler.on_trigger(event, *args, **kwargs)
+
+    def get_event(self, name: str) -> Optional[Event]:
+        return self._events.get(name)
+
+    def get_or_create_event(self, name: str) -> Event:
+        if event := self.get_event(name):
+            return event
+
+        event = Event()
+        self._events[name] = event
+        return event
+
+    def check_event(self, name: str) -> Event:
+        if event := self.get_event(name):
+            return event
+
+        raise RuntimeError(f"Event '{name}' doesn't exist.")
