@@ -6,3 +6,8 @@
 ## Description
 
 Asynchronous event bus.
+
+## Resources
+
+* [**How to use**](documentations/how-to-use.md)
+* [**Development installation**](documentations/development-installation.md)
