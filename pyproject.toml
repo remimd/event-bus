@@ -2,13 +2,15 @@
 name = "event-bus"
 version = "0.1.0"
 description = "Asynchronous event bus."
-authors = ["remimd"]
 license = "MIT"
-readme = "README.md"
+authors = ["remimd"]
+readme = "documentations/how-to-use.md"
+homepage = "https://github.com/remimd/event-bus"
 repository = "https://github.com/remimd/event-bus"
+packages = [{ include = "event_bus" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"

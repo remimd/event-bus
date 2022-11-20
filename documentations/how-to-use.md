@@ -1,4 +1,4 @@
-# Usage
+# How to use
 
 ## Define a bus
 
@@ -25,7 +25,7 @@ def some_function():
 
 ## Trigger an event
 
-> ***If you don't use a custom handler**, you need an active event loop from `asyncio`.*
+> ***If you use a default handler**, you need an active event loop from `asyncio`.*
 
 ```python
 bus.trigger("event_name")
