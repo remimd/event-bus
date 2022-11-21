@@ -2,26 +2,29 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from inspect import isfunction
-from typing import Callable, Optional, Type, final
+from typing import Any, Callable, Optional, Type, final
 
 from .handlers import AsyncHandler, BusHandler
+
+
+Subscriber = Callable
 
 
 @final
 @dataclass(frozen=True, slots=True)
 class Event:
-    subscribers: list[Callable] = field(default_factory=list, init=False)
+    subscribers: list[Subscriber] = field(default_factory=list, init=False)
 
-    def add_subscriber(self, subscriber: Callable):
+    def add_subscriber(self, subscriber: Subscriber):
         if not isfunction(subscriber):
             raise TypeError("The subscriber isn't a function.")
 
         self.subscribers.append(subscriber)
 
-    def subscribe(self, function: Callable) -> Callable:
+    def subscribe(self, subscriber: Subscriber) -> Subscriber:
         # It's a decorator
-        self.add_subscriber(function)
-        return function
+        self.add_subscriber(subscriber)
+        return subscriber
 
 
 @final
@@ -49,9 +52,9 @@ class Bus:
     def on_event(self) -> OnEvent:
         return self._on_event  # pragma: no cover
 
-    def trigger(self, event_name: str, *args, **kwargs):
+    def trigger(self, event_name: str, *args, **kwargs) -> Any:
         event = self.check_event(event_name)
-        self._handler.on_trigger(event, *args, **kwargs)
+        return self._handler.on_trigger(event, *args, **kwargs)
 
     def get_event(self, name: str) -> Optional[Event]:
         return self._events.get(name)

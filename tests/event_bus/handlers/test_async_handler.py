@@ -1,3 +1,5 @@
+from asyncio import Future
+
 import pytest
 
 from event_bus import AsyncHandler
@@ -22,9 +24,11 @@ class TestAsyncHandler(TestCaseMixin):
     on_trigger
     """
 
-    def test_on_trigger_with_success_return_none(self):
+    async def test_on_trigger_with_success_return_future(self):
         event = self.event_with_subscribers_factory()
-        assert self.handler.on_trigger(event) is None
+        future = self.handler.on_trigger(event)
+        assert isinstance(future, Future)
+        await future
 
     """
     _run_in_thread
