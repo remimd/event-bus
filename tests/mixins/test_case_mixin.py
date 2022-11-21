@@ -43,6 +43,8 @@ class TestCaseMixin:
     @contextmanager
     def mock_on_trigger(bus: Bus, return_value: Any = None) -> ContextManager[Mock]:
         with patch.object(
-            bus._handler, "on_trigger", return_value=return_value
+            bus._handler,
+            "on_trigger",
+            return_value=return_value,
         ) as mock:
             yield mock

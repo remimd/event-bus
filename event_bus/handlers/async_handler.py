@@ -10,7 +10,8 @@ from typing import Any, Awaitable, TYPE_CHECKING
 from .abstract_handler import BusHandler
 
 if TYPE_CHECKING:
-    from event_bus import Event, Subscriber
+    from event_bus import Event
+    from event_bus.typing import Subscriber, Subscribers
 
 
 class AsyncHandler(BusHandler):
@@ -22,7 +23,7 @@ class AsyncHandler(BusHandler):
 
     @classmethod
     def _prepare_subscribers(
-        cls, subscribers: list[Subscriber], *args, **kwargs
+        cls, subscribers: Subscribers, *args, **kwargs
     ) -> tuple[Awaitable, ...]:
         return tuple(
             cls._to_awaitable(subscriber, *args, **kwargs) for subscriber in subscribers

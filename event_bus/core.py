@@ -1,19 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import wraps
 from inspect import isfunction
-from typing import Any, Callable, Optional, Type, final
+from typing import Any, Callable, Final, Optional, TYPE_CHECKING, final
 
-from .handlers import AsyncHandler, BusHandler
+from .exceptions import EventDoesNotExist
+from .handlers import AsyncHandler
 
-
-Subscriber = Callable
+if TYPE_CHECKING:
+    from .typing import (
+        BusHandlerType,
+        Events,
+        Subscriber,
+        Subscribers,
+    )
 
 
 @final
 @dataclass(frozen=True, slots=True)
 class Event:
-    subscribers: list[Subscriber] = field(default_factory=list, init=False)
+    subscribers: Subscribers = field(default_factory=list, init=False)
 
     def add_subscriber(self, subscriber: Subscriber):
         if not isfunction(subscriber):
@@ -22,9 +29,13 @@ class Event:
         self.subscribers.append(subscriber)
 
     def subscribe(self, subscriber: Subscriber) -> Subscriber:
-        # It's a decorator
         self.add_subscriber(subscriber)
-        return subscriber
+
+        @wraps(subscriber)
+        def wrapper(*args, **kwargs):
+            return subscriber(*args, **kwargs)  # pragma: no cover
+
+        return wrapper
 
 
 @final
@@ -39,11 +50,13 @@ class OnEvent:
 
 @final
 class Bus:
-    _events: dict[str, Event]
-    _handler: Type[BusHandler]
-    _on_event: OnEvent
+    __slots__ = "_events", "_handler", "_on_event"
 
-    def __init__(self, handler: Type[BusHandler] = AsyncHandler):
+    _events: Final[Events]
+    _handler: Final[BusHandlerType]
+    _on_event: Final[OnEvent]
+
+    def __init__(self, handler: BusHandlerType = AsyncHandler):
         self._events = {}
         self._handler = handler
         self._on_event = OnEvent(self)
@@ -71,4 +84,4 @@ class Bus:
         if event := self.get_event(name):
             return event
 
-        raise RuntimeError(f"Event '{name}' doesn't exist.")
+        raise EventDoesNotExist(name)

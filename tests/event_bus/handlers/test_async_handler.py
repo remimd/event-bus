@@ -28,7 +28,8 @@ class TestAsyncHandler(TestCaseMixin):
         event = self.event_with_subscribers_factory()
         future = self.handler.on_trigger(event)
         assert isinstance(future, Future)
-        await future
+        result = await future
+        assert isinstance(result, list)
 
     """
     _run_in_thread
