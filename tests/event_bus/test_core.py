@@ -1,5 +1,6 @@
 import pytest
 
+from event_bus.exceptions import EventDoesNotExist
 from tests.mixins.test_case_mixin import TestCaseMixin
 
 
@@ -89,7 +90,10 @@ class TestBus(TestCaseMixin):
     def test_trigger_with_event_does_not_exist_raise_runtime_error(self):
         bus = self.bus_factory()
         event_name = "event_does_not_exist"
-        with pytest.raises(RuntimeError, match=f"Event '{event_name}' doesn't exist."):
+        with pytest.raises(
+            EventDoesNotExist,
+            match=f"Event '{event_name}' doesn't exist.",
+        ):
             bus.trigger(event_name)
 
     def test_trigger_with_success_return_any(self):

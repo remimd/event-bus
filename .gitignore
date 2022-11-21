@@ -317,3 +317,6 @@ cython_debug/
 .fleet/
 .idea/
 .vscode/
+
+# Pyenv
+.python-version
