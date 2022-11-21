@@ -92,9 +92,9 @@ class TestBus(TestCaseMixin):
         with pytest.raises(RuntimeError, match=f"Event '{event_name}' doesn't exist."):
             bus.trigger(event_name)
 
-    def test_trigger_with_success_return_none(self):
+    def test_trigger_with_success_return_any(self):
         bus = self.bus_factory()
         with self.mock_on_trigger(bus) as mock:
-            assert bus.trigger("test_event") is None
+            bus.trigger("test_event")
 
         assert mock.call_count == 1
