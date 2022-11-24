@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import functools
-from asyncio import Future
+from asyncio import Future, iscoroutinefunction
 from concurrent.futures import ThreadPoolExecutor
-from inspect import iscoroutinefunction
 from typing import Any, Awaitable, TYPE_CHECKING
 
 from .abstract_handler import BusHandler
@@ -18,8 +17,7 @@ class AsyncHandler(BusHandler):
     @classmethod
     def on_trigger(cls, event: Event, *args, **kwargs) -> Future:
         awaitables = cls._prepare_subscribers(event.subscribers, *args, **kwargs)
-        job = asyncio.gather(*awaitables)
-        return asyncio.ensure_future(job)
+        return asyncio.gather(*awaitables)
 
     @classmethod
     def _prepare_subscribers(
